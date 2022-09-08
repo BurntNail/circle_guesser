@@ -94,7 +94,7 @@ jobs:
     needs: [ check, run-tests, lints ]
     runs-on: ubuntu-latest
     steps:
-      - name: Build Windows
+    - name: Build Windows
       uses: actions-rs/cargo@v1
       with:
         command: build
