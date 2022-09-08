@@ -1,0 +1,151 @@
+﻿use piston_window::{clear, Context, DrawState, Ellipse, G2d, Graphics};
+use piston_window::types::{Color};
+use rand::prelude::ThreadRng;
+use rand::{Rng, thread_rng};
+
+const SCALE: f64 = 5.0;
+const PADDING: f64 = 0.1;
+const MIN_PCTG: f64 = 0.2;
+const START_HINTS: usize = 3;
+
+pub struct CircleGuesserApp {
+    current_hints: Vec<[f64; 2]>, 
+    is_revealed: Option<[f64; 2]>, //holds the mouse pos
+    needs_to_report_score: bool,
+    current_circle: (f64, f64, f64), //x, y, radius
+    old_size: [f64; 2],
+    gen: ThreadRng,
+}
+
+impl CircleGuesserApp {
+    pub fn new (win_size: [f64; 2]) -> Self {
+        let mut s = Self {
+            current_hints: vec![[0.0, 0.0]; START_HINTS],
+            is_revealed: None,
+            needs_to_report_score: false,
+            current_circle: (0.0, 0.0, 0.0),
+            old_size: [0.0, 0.0],
+            gen: thread_rng()
+        };
+        s.get_new_values(Some(win_size));
+        s
+    }
+    
+    pub fn get_new_values (&mut self, win_size: Option<[f64; 2]>) {
+        if let Some(ws) = win_size {
+            self.old_size = ws;
+        }
+        self.is_revealed = None;
+        
+        let x_size = f64::from(self.old_size[0]) / SCALE;
+        let y_size = f64::from(self.old_size[1]) / SCALE;
+
+        let chosen_x = f64::from(self.gen.gen_range({
+            let min_x = (x_size * PADDING) as u32;
+            let max_x = (x_size as u32) - min_x;
+            min_x..max_x
+        }));
+        let chosen_y = f64::from(self.gen.gen_range({
+            let min_y = (y_size * PADDING) as u32;
+            let max_y = (y_size as u32) - min_y;
+            min_y..max_y
+        }));
+        
+        let min_dist_to_edge = (x_size - chosen_x).min(y_size - chosen_y).min(chosen_x).min(chosen_y);
+        let radius = self.gen.gen_range((min_dist_to_edge * MIN_PCTG)..min_dist_to_edge);
+        
+        self.current_circle = (chosen_x, chosen_y, radius);
+        
+        let mut get_pos = || {
+            let top_right_from_d = |d| {
+                let d = f64::from(d);
+                let from_right_flat = 90.0 - d;
+                [radius * from_right_flat.to_radians().cos(), radius * from_right_flat.to_radians().sin()]
+            };
+            
+            let degrees = self.gen.gen_range(0..360_u32);
+            let [px, py] = match degrees {
+                0 => [0.0, -radius],
+                1..=89 => {
+                    //top right
+                    top_right_from_d(degrees)
+                },
+                90 => [radius, 0.0],
+                91..=179 => {
+                    //btm right
+                    let coords = top_right_from_d(degrees - 90);
+                    [coords[0], -coords[1]]
+                },
+                180 => [0.0, radius],
+                181..=269 => {
+                    //btm left
+                    let coords = top_right_from_d(degrees - 180);
+                    [-coords[0], -coords[1]]
+                },
+                270 => [-radius, 0.0],
+                271..=359 => {
+                    //top left
+                    let coords = top_right_from_d(degrees - 270);
+                    [-coords[0], coords[1]]
+                }
+                _ => unreachable!("degrees messed up")
+            };
+            
+            [chosen_x + px, chosen_y + py]
+        };
+        self.current_hints = (0..self.current_hints.len()).map(|_| get_pos()).collect();
+        self.needs_to_report_score = true;
+    }
+
+    pub fn render(
+        &mut self,
+        ctx: Context,
+        graphics: &mut G2d,
+        window_size: [f64; 2],
+    )  {        
+        clear(Color::from([0.0; 4]), graphics);
+        
+        if self.old_size != window_size || self.old_size == [0.0; 2] {
+            self.get_new_values(Some(window_size));
+        }
+        
+        let t = ctx.transform;
+        for pos in &self.current_hints {
+            let ellipse = Ellipse::new(Color::from([0.0, 1.0, 0.0, 1.0]));
+            let rect = [pos[0] * SCALE, pos[1] * SCALE, SCALE, SCALE];
+            graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
+        }
+        
+        if let Some([mx, my]) = self.is_revealed {
+            let (cx, cy, rad) = self.current_circle;
+            let size = rad.min(1.5) * SCALE;
+            {
+                let circle = Ellipse::new_border(Color::from([1.0, 0.0, 0.0, 1.0]), size);
+                let rect = [cx * SCALE, cy * SCALE, size, size];
+                graphics.ellipse(&circle, rect, &DrawState::default(), t);
+            }
+            {
+                let ellipse = Ellipse::new(Color::from([0.0, 0.0, 1.0, 1.0]));
+                let rect = [mx, my, size / 1.5, size / 1.5];
+                graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
+            }
+            if self.needs_to_report_score {
+                let distance = (mx - cx * SCALE).hypot(my - cy * SCALE);
+                if distance == 0.0 {
+                    println!("Perfect Score!");
+                } else {
+                    let win_av_size = window_size[0].hypot(window_size[1]);
+                    println!("You were {distance:.1} away - that is only {:.1}% of the screen size!", distance / win_av_size * 100.0)
+                }
+                self.needs_to_report_score = false;
+            }
+        }
+        
+    }
+    
+    pub fn mouse_input (&mut self, pos: [f64; 2]) {
+        if self.is_revealed.is_none() {
+            self.is_revealed = Some(pos);
+        }
+    }
+}
