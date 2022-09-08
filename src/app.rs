@@ -146,6 +146,8 @@ impl CircleGuesserApp {
     pub fn mouse_input (&mut self, pos: [f64; 2]) {
         if self.is_revealed.is_none() {
             self.is_revealed = Some(pos);
+        } else {
+            println!("Need to Clear using C");
         }
     }
 }
