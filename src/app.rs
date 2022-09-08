@@ -1,5 +1,4 @@
 ﻿use piston_window::{clear, Context, DrawState, Ellipse, G2d, Graphics};
-use piston_window::types::{Color};
 use rand::prelude::ThreadRng;
 use rand::{Rng, thread_rng};
 
@@ -37,8 +36,8 @@ impl CircleGuesserApp {
         }
         self.is_revealed = None;
         
-        let x_size = f64::from(self.old_size[0]) / SCALE;
-        let y_size = f64::from(self.old_size[1]) / SCALE;
+        let x_size = self.old_size[0] / SCALE;
+        let y_size = self.old_size[1] / SCALE;
 
         let chosen_x = f64::from(self.gen.gen_range({
             let min_x = (x_size * PADDING) as u32;
@@ -103,7 +102,7 @@ impl CircleGuesserApp {
         graphics: &mut G2d,
         window_size: [f64; 2],
     )  {        
-        clear(Color::from([0.0; 4]), graphics);
+        clear([0.0; 4], graphics);
         
         if self.old_size != window_size || self.old_size == [0.0; 2] {
             self.get_new_values(Some(window_size));
@@ -111,7 +110,7 @@ impl CircleGuesserApp {
         
         let t = ctx.transform;
         for pos in &self.current_hints {
-            let ellipse = Ellipse::new(Color::from([0.0, 1.0, 0.0, 1.0]));
+            let ellipse = Ellipse::new([0.0, 1.0, 0.0, 1.0]);
             let rect = [pos[0] * SCALE, pos[1] * SCALE, SCALE, SCALE];
             graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
         }
@@ -120,12 +119,12 @@ impl CircleGuesserApp {
             let (cx, cy, rad) = self.current_circle;
             let size = rad.min(1.5) * SCALE;
             {
-                let circle = Ellipse::new_border(Color::from([1.0, 0.0, 0.0, 1.0]), size);
+                let circle = Ellipse::new_border([1.0, 0.0, 0.0, 1.0], size);
                 let rect = [cx * SCALE, cy * SCALE, size, size];
                 graphics.ellipse(&circle, rect, &DrawState::default(), t);
             }
             {
-                let ellipse = Ellipse::new(Color::from([0.0, 0.0, 1.0, 1.0]));
+                let ellipse = Ellipse::new([0.0, 0.0, 1.0, 1.0]);
                 let rect = [mx, my, size / 1.5, size / 1.5];
                 graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
             }
