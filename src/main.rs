@@ -1,5 +1,8 @@
-use piston_window::{Button, Key, MouseButton, MouseCursorEvent, PistonWindow, PressEvent, RenderEvent, WindowSettings};
 use crate::app::CircleGuesserApp;
+use piston_window::{
+    Button, Key, MouseButton, MouseCursorEvent, PistonWindow, PressEvent, RenderEvent,
+    WindowSettings,
+};
 
 mod app;
 
@@ -9,8 +12,9 @@ fn main() {
     let mut win: PistonWindow = WindowSettings::new("Circle Guesser", start_size)
         .exit_on_esc(true)
         .resizable(true)
-        .build().expect("building window");
-    
+        .build()
+        .expect("building window");
+
     let mut mouse_pos = [0.0, 0.0];
     while let Some(e) = win.next() {
         if let Some(r) = e.render_args() {
@@ -18,25 +22,28 @@ fn main() {
                 app.render(c, g, r.window_size);
             });
         }
-        
+
         if let Some(pa) = e.press_args() {
             match pa {
-                Button::Keyboard(kb) => if kb == Key::C {
-                    app.get_new_values(None);
+                Button::Keyboard(kb) => match kb {
+                    Key::Left => app.less_pts(),
+                    Key::Right => app.more_pts(),
+                    Key::C => app.get_new_values(None),
+                    _ => {}
                 },
                 Button::Mouse(m) => match m {
                     MouseButton::Left => {
                         app.mouse_input(mouse_pos);
-                    },
+                    }
                     MouseButton::Right => {
                         app.get_new_values(None);
-                    },
+                    }
                     _ => {}
                 },
                 _ => {}
             }
         }
-        
+
         e.mouse_cursor(|p| mouse_pos = p);
     }
 }
