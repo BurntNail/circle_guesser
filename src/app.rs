@@ -101,8 +101,9 @@ impl CircleGuesserApp {
 
         self.current_circle = (chosen_x, chosen_y, radius);
 
-        let mut get_pos = || Self::get_point_on_circle(&mut self.gen, self.current_circle);
-        self.current_hints = (0..self.current_hints.len()).map(|_| get_pos()).collect();
+        self.current_hints = (0..self.current_hints.len())
+            .map(|_| Self::get_point_on_circle(&mut self.gen, self.current_circle))
+            .collect();
         self.needs_to_report_score = true;
     }
 
@@ -134,15 +135,26 @@ impl CircleGuesserApp {
 
         if let Some([mx, my]) = self.is_revealed {
             let (cx, cy, rad) = self.current_circle;
-            let size = rad.min(1.5) * SCALE;
+            let size = SCALE.min(2.0);
             {
-                let circle = Ellipse::new_border([1.0, 0.0, 0.0, 1.0], size);
-                let rect = [cx * SCALE, cy * SCALE, size, size];
+                //circle
+                let circle = Ellipse::new_border([1.0, 0.0, 0.0, 1.0], SCALE);
+                let rect = [cx * SCALE, cy * SCALE, SCALE, SCALE];
                 graphics.ellipse(&circle, rect, &DrawState::default(), t);
+
+                let ellipse = Ellipse::new_border([0.75, 0.75, 0.75, 0.5], size);
+                let rect = [
+                    (cx - rad) * SCALE,
+                    (cy - rad) * SCALE,
+                    rad * 2.0 * SCALE,
+                    rad * 2.0 * SCALE,
+                ];
+                graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
             }
             {
+                //mouse
                 let ellipse = Ellipse::new([0.0, 0.0, 1.0, 1.0]);
-                let rect = [mx, my, size / 1.5, size / 1.5];
+                let rect = [mx, my, SCALE * 2.0, SCALE * 2.0];
                 graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
             }
             if self.needs_to_report_score {
