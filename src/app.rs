@@ -91,7 +91,8 @@ impl CircleGuesserApp {
             min_y..max_y
         }));
 
-        let min_dist_to_edge = (x_size - chosen_x)
+        let min_dist_to_edge = 
+            (x_size - chosen_x)
             .min(y_size - chosen_y)
             .min(chosen_x)
             .min(chosen_y);

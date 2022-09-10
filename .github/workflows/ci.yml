@@ -89,17 +89,18 @@ jobs:
 #           command: clippy
 #           args: -- -D warnings
           
+#  build:
+#    name: Build Client
+##     needs: [ check, run-tests, lints ]
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Build Windows
+#      uses: actions-rs/cargo@v1
+#      with:
+#        command: build
+#        args: --release
+  
   build:
-    name: Build Client
-#     needs: [ check, run-tests, lints ]
-    runs-on: ubuntu-latest
-    steps:
-    - name: Build Windows
-      uses: actions-rs/cargo@v1
-      with:
-        command: build
-        args: --release
-        
     - name: Check contents
       run: "ls"
         
