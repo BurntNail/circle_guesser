@@ -11,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - run: "echo $(ls)"
+      - run: "echo $(pwd)"
