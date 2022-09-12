@@ -102,7 +102,7 @@ impl CircleGuesserApp {
             let end = min_dist_to_edge
             self
                 .gen
-                .gen_range(start..end);
+                .gen_range(start..end)
         });
 
         self.current_circle = (chosen_x, chosen_y, radius);
