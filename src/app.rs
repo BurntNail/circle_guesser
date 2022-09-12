@@ -95,9 +95,15 @@ impl CircleGuesserApp {
             .min(y_size - chosen_y)
             .min(chosen_x)
             .min(chosen_y);
-        let radius = self
-            .gen
-            .gen_range((min_dist_to_edge * MIN_PCTG)..min_dist_to_edge);
+        
+        
+        let radius = f64::from({
+            let start = (min_dist_to_edge * MIN_PCTG) as u32;
+            let end = min_dist_to_edge
+            self
+                .gen
+                .gen_range(start..end);
+        });
 
         self.current_circle = (chosen_x, chosen_y, radius);
 
