@@ -99,7 +99,7 @@ impl CircleGuesserApp {
         
         let radius = f64::from({
             let start = (min_dist_to_edge * MIN_PCTG) as u32;
-            let end = min_dist_to_edge
+            let end = min_dist_to_edge;
             self
                 .gen
                 .gen_range(start..end)
