@@ -17,6 +17,6 @@ Simple game for guessing the centre of a circle, using 3 points on the circumfer
 ## User Experience
  - Two windows should open - one of them should be a square, with 3 green dots. This is the main game window, and the other is for displaying messages like scores.
  - The 3 green dots show the 3 positions on the circumference, and you can use a greater or fewer number of points with the left and right arrow keys.
- - Click on the window to make a guess, and a Red circle will show the actual Centre, a Grey outline will show the circumference, and a Blue circle will show where you clicked.
+ - Click on the window any number of times to make a guess and then press R, and a Red circle will show the actual Centre, a Grey outline will show the circumference, and a Blue circle will show where you clicked.
  - Press C or Right Click to try again. If you changed the number of hints, that will be preserved.
  - NB: If you resize the Window, a couple of invariants break so it will restart the current round.

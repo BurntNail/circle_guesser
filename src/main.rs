@@ -28,7 +28,8 @@ fn main() {
                 Button::Keyboard(kb) => match kb {
                     Key::Left => app.less_pts(),
                     Key::Right => app.more_pts(),
-                    Key::C => app.get_new_values(None),
+                    Key::C => app.clear(None),
+                    Key::R => app.reveal(),
                     _ => {}
                 },
                 Button::Mouse(m) => match m {
@@ -36,7 +37,7 @@ fn main() {
                         app.mouse_input(mouse_pos);
                     }
                     MouseButton::Right => {
-                        app.get_new_values(None);
+                        app.clear(None);
                     }
                     _ => {}
                 },
