@@ -111,6 +111,7 @@ impl CircleGuesserApp {
         self.current_hints = (0..self.current_hints.len())
             .map(|_| Self::get_point_on_circle(&mut self.gen, self.current_circle))
             .collect();
+
         self.mouse_positions.clear();
         self.is_revealed = false;
     }
@@ -158,7 +159,7 @@ impl CircleGuesserApp {
             let ellipse = Ellipse::new([0.0, 0.0, 1.0, 1.0]);
 
             for (i, [mx, my]) in self.mouse_positions.iter().copied().enumerate() {
-                let rect = [mx, my, smol_size, smol_size];
+                let rect = [mx, my, SCALE, SCALE];
                 graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
 
                 let distance = (mx - cx * SCALE).hypot(my - cy * SCALE);
@@ -202,6 +203,8 @@ impl CircleGuesserApp {
                     }
                 }
                 self.needs_to_report_score = false;
+
+                println!("\n\n\n\n\n");
             }
         }
 
