@@ -1,3 +1,5 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
 use crate::app::CircleGuesserApp;
 use piston_window::{
     Button, Key, MouseButton, MouseCursorEvent, PistonWindow, PressEvent, RenderEvent,
