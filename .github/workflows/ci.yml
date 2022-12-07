@@ -68,14 +68,6 @@ jobs:
           toolchain: nightly
           components: rustfmt
 
-
-      - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          toolchain: nightly
-          command: fmt
-          args: --all -- --check
-
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
