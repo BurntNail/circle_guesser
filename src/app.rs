@@ -1,13 +1,12 @@
 use piston_window::{clear, Context, DrawState, Ellipse, G2d, Graphics, Line};
-use rand::prelude::ThreadRng;
-use rand::{thread_rng, Rng};
+use rand::{prelude::ThreadRng, thread_rng, Rng};
 
 const SCALE: f64 = 5.0;
 const PADDING: f64 = 0.1;
 const MIN_PCTG: f64 = 0.2;
 const START_HINTS: usize = 3;
 
-pub struct CircleGuesserApp {
+pub struct CircleGuesser {
     current_hints: Vec<[f64; 2]>,
     is_revealed: bool,
     mouse_positions: Vec<[f64; 2]>,
@@ -17,7 +16,7 @@ pub struct CircleGuesserApp {
     gen: ThreadRng,
 }
 
-impl CircleGuesserApp {
+impl CircleGuesser {
     pub fn new(win_size: [f64; 2]) -> Self {
         let mut s = Self {
             current_hints: vec![[0.0, 0.0]; START_HINTS],
@@ -96,14 +95,11 @@ impl CircleGuesserApp {
             .min(y_size - chosen_y)
             .min(chosen_x)
             .min(chosen_y);
-        
-        
+
         let radius = f64::from({
             let start = (min_dist_to_edge * MIN_PCTG) as u32;
             let end = min_dist_to_edge as u32;
-            self
-                .gen
-                .gen_range(start..end)
+            self.gen.gen_range(start..end)
         });
 
         self.current_circle = (chosen_x, chosen_y, radius);
@@ -116,7 +112,7 @@ impl CircleGuesserApp {
         self.is_revealed = false;
     }
 
-    pub fn reveal (&mut self) {
+    pub fn reveal(&mut self) {
         if !self.mouse_positions.is_empty() {
             self.is_revealed = true;
             self.needs_to_report_score = true;
@@ -138,14 +134,15 @@ impl CircleGuesserApp {
     pub fn render(&mut self, ctx: Context, graphics: &mut G2d, window_size: [f64; 2]) {
         clear([0.0; 4], graphics);
 
-        if self.old_size != window_size || self.old_size == [0.0; 2] {
+        if !f64_arrays_equal(self.old_size, window_size)
+            || f64_arrays_equal(self.old_size, <_>::default())
+        {
             self.clear(Some(window_size));
         }
 
         let t = ctx.transform;
         let (cx, cy, rad) = self.current_circle;
         let smol_size = SCALE.min(2.0);
-
 
         for pos in &self.current_hints {
             let ellipse = Ellipse::new([0.0, 1.0, 0.0, 1.0]);
@@ -179,8 +176,19 @@ impl CircleGuesserApp {
             }
 
             if self.is_revealed {
-                for [mx, my] in shortest.iter().copied().map(|(i, _)| self.mouse_positions[i]) { //TODO: Make const colours
-                    Line::new_round([0.0, 0.0, 1.0, 1.0], smol_size).draw_from_to([cx * SCALE, cy * SCALE], [mx, my], &DrawState::default(), t, graphics)
+                for [mx, my] in shortest
+                    .iter()
+                    .copied()
+                    .map(|(i, _)| self.mouse_positions[i])
+                {
+                    //TODO: Make const colours
+                    Line::new_round([0.0, 0.0, 1.0, 1.0], smol_size).draw_from_to(
+                        [cx * SCALE, cy * SCALE],
+                        [mx, my],
+                        &DrawState::default(),
+                        t,
+                        graphics,
+                    );
                 }
             }
 
@@ -188,18 +196,13 @@ impl CircleGuesserApp {
                 let win_av_size = window_size[0].hypot(window_size[1]);
 
                 for (i, distance) in all_distances.into_iter().map(|(i, d)| (i + 1, d)) {
-                    if distance == 0.0 {
+                    if (distance - 0.0).abs() < f64::EPSILON {
                         println!("#{i}: Perfect Score!");
-                    } else if shortest.contains(&(i - 1, distance)) {
-                        println!(
-                            "#{i}: You were {distance:.1} away - that is only {:.1}% of the screen size!",
-                            distance / win_av_size * 100.0
-                        )
                     } else {
                         println!(
                             "#{i}: You were {distance:.1} away - that is only {:.1}% of the screen size!",
                             distance / win_av_size * 100.0
-                        )
+                        );
                     }
                 }
                 self.needs_to_report_score = false;
@@ -230,4 +233,23 @@ impl CircleGuesserApp {
     pub fn mouse_input(&mut self, pos: [f64; 2]) {
         self.mouse_positions.push(pos);
     }
+}
+
+#[allow(dead_code)]
+fn f32_arrays_equal<const N: usize>(a: [f32; N], b: [f32; N]) -> bool {
+    for (a, b) in a.into_iter().zip(b.into_iter()) {
+        if (a - b).abs() > f32::EPSILON {
+            return false;
+        }
+    }
+    true
+}
+#[allow(dead_code)]
+fn f64_arrays_equal<const N: usize>(a: [f64; N], b: [f64; N]) -> bool {
+    for (a, b) in a.into_iter().zip(b.into_iter()) {
+        if (a - b).abs() > f64::EPSILON {
+            return false;
+        }
+    }
+    true
 }

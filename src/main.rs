@@ -1,6 +1,7 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+#![allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 
-use crate::app::CircleGuesserApp;
+use crate::app::CircleGuesser;
 use piston_window::{
     Button, Key, MouseButton, MouseCursorEvent, PistonWindow, PressEvent, RenderEvent,
     WindowSettings,
@@ -10,7 +11,7 @@ mod app;
 
 fn main() {
     let start_size = [800.0, 800.0];
-    let mut app = CircleGuesserApp::new(start_size);
+    let mut app = CircleGuesser::new(start_size);
     let mut win: PistonWindow = WindowSettings::new("Circle Guesser", start_size)
         .exit_on_esc(true)
         .resizable(true)
