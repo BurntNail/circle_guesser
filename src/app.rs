@@ -159,7 +159,7 @@ impl CircleGuesser {
                 let rect = [mx, my, SCALE, SCALE];
                 graphics.ellipse(&ellipse, rect, &DrawState::default(), t);
 
-                let distance = (mx - cx * SCALE).hypot(my - cy * SCALE);
+                let distance = (cx.mul_add(-SCALE, mx)).hypot(my - cy * SCALE);
                 all_distances.push((i, distance));
 
                 let mut must_push = true;
